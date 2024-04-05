@@ -1,16 +1,20 @@
-import { StyleSheet, Text, View, useColorScheme, Image, Dimensions, Pressable } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, useColorScheme, Image, Dimensions, Pressable, NativeModules, BackHandler, Animated, Easing } from 'react-native'
+import React, { useRef, useState } from 'react'
 import { DrawerScreenProps } from '@react-navigation/drawer'
 import colors from '../lib/colors'
 import { useNavigation } from '@react-navigation/native'
 import RNFetchBlob from 'rn-fetch-blob'
-import { makeShareable } from 'react-native-reanimated/lib/typescript/reanimated2/shareables'
+// @ts-ignore
+import ManageWallpaper, { TYPE } from 'react-native-manage-wallpaper';
+import Snackbar from 'react-native-snackbar'
 
 type WallpaperDetailsProps = DrawerScreenProps<ComponentProps, 'WallpaperDetails'>
 
 const dvw = Dimensions.get('window').width
 const dvh = Dimensions.get('window').height
+
 export default function WallpaperDetails({route}: WallpaperDetailsProps) {
+    
     const darkMode = useColorScheme() === 'dark'
     const navigation = useNavigation()
 
@@ -28,8 +32,48 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             }
         }).fetch('GET', url)
     }
+
+    const [showWallpaperTypes, setShowWallpaperTypes] = useState<boolean>(false)
+    const scaleVal = useRef(new Animated.Value(0)).current
+
+    function toggleWallpaperTypes(action: 'show' | 'hide'){
+        if(action === 'show'){
+            setShowWallpaperTypes(true)    
+            Animated.timing(scaleVal, {
+                toValue:1,
+                duration:150,
+                easing:Easing.linear,
+                useNativeDriver:true
+            }).start()
+        }else{
+            setShowWallpaperTypes(false)
+            scaleVal.resetAnimation()
+        }
+        
+    }
+    function setWallpaper(wallpaperType: TYPE.HOME | TYPE.LOCK | TYPE.BOTH, uri:string){
+        setShowWallpaperTypes(false)
+        ManageWallpaper.setWallpaper({
+            uri:`${uri}.png`
+        },
+        () => Snackbar.show({
+            text:"Wallpaper changed",
+            duration:Snackbar.LENGTH_LONG
+        }),
+        wallpaperType
+        )
+    }
+    BackHandler.addEventListener('hardwareBackPress', () =>{
+        if(showWallpaperTypes){
+            setShowWallpaperTypes(false)
+            return true
+        }
+        navigation.goBack()
+        return true
+    })
   return (
     <View style={styles.wallpaperWrapper}>
+        <Pressable onPress={() => toggleWallpaperTypes('hide')} style={[styles.blackView, !showWallpaperTypes ? styles.invisibleElem : {}]}></Pressable>
         <Image style={styles.wallpaper} source={{uri:route.params.wallpaperUrl}}/>
 
         <View style={styles.wallpaperHeader}>
@@ -38,11 +82,22 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             </Pressable>
         </View>
 
+        <Animated.View style={[styles.wallpaperTypesWrapper, !showWallpaperTypes ? styles.invisibleElem : {}, {transform:[{scale:scaleVal}]}]}>
+            <Pressable onPress={() => setWallpaper(TYPE.HOME, route.params.wallpaperUrl)} style={({pressed}) => [styles.wallpaperTypesButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+                <Image style={styles.wallpaperTypesImages} source={require('../images/phone.png')}/><Text style={{color:'white'}}>Homescreen</Text></Pressable>
+            <Pressable onPress={() => setWallpaper(TYPE.LOCK, route.params.wallpaperUrl)} style={({pressed}) => [styles.wallpaperTypesButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+                <Image style={styles.wallpaperTypesImages} source={require('../images/lock.png')}/><Text style={{color:'white'}}>Lockscreen</Text></Pressable>
+            <Pressable onPress={() => setWallpaper(TYPE.BOTH, route.params.wallpaperUrl)} style={({pressed}) => [styles.wallpaperTypesButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+                <Image style={[styles.wallpaperTypesImages ]} source={require('../images/phone.png')}/>
+                <Image style={[styles.wallpaperTypesImages, styles.lock]} source={require('../images/lock.png')}/>
+                <Text style={{color:'white', transform:[{translateX:-15}]}}>Both</Text></Pressable>
+        </Animated.View>
+
         <View style={styles.actionsWrapper}>
             <Pressable onPress={() => downloadImage(route.params.wallpaperUrl)} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
                 <Image style={styles.actionIcons} source={require('../images/whiteDownload.png')} />
             </Pressable>
-            <Pressable style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+            <Pressable onPress={() => toggleWallpaperTypes('show')} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
                 <Image style={styles.actionIcons} source={require('../images/photo.png')}/>
             </Pressable>
             <Pressable style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
@@ -58,6 +113,14 @@ const styles = StyleSheet.create({
         flex:1,
         position:'relative',
         justifyContent:'space-between'
+    },
+    blackView:{
+        position:'absolute',
+        width:dvw,
+        height:dvh,
+        backgroundColor:'rgba(0, 0, 0, .5)',
+        top:0,
+        zIndex:1
     },
     wallpaperHeader:{
         height:dvh / 15,
@@ -103,5 +166,32 @@ const styles = StyleSheet.create({
     actionIcons:{
         width:25,
         height:25
+    },
+    wallpaperTypesWrapper:{
+        width:dvw / 1.2,
+        marginLeft:'9%',
+        backgroundColor:"rgba(0, 0, 0, .8)",
+        padding:20,
+        borderRadius:10,
+        zIndex:2
+    },
+    invisibleElem:{
+        display:'none'
+    },
+    wallpaperTypesButtons:{
+        marginVertical:15,
+        flexDirection:'row',
+        alignItems:'center',
+        paddingVertical:10,
+        borderRadius:10
+    },
+    wallpaperTypesImages:{
+        width:35,
+        height:35
+    },
+    lock:{
+        width:15,
+        height:15,
+        transform:[{translateX:-25}]
     }
 })

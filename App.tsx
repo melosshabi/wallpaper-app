@@ -6,8 +6,10 @@ import { View, Pressable, useColorScheme, Text, StyleSheet, Image, Switch } from
 import Home from './screens/Home'
 import CustomBurgerButton from './components/CustomBurgerButton'
 import WallpaperDetails from './screens/WallpaperDetails'
+import ImageSearchBar from './components/ImageSearchBar'
 // lib
 import colors from './lib/colors'
+import { SearchBar } from 'react-native-screens'
 
 function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolean){
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState<boolean>(false)
@@ -18,7 +20,7 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
         <View style={styles.headerTextWrapper}><Text style={styles.headerText}>Mela Wallpapers</Text></View>
       </View>
       <View style={styles.drawerBody}>
-        <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
+        <Pressable onPress={() => navigation.navigate("Home", undefined)}  style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
           <Image source={darkMode ? require("./images/whiteHome.png") : require("./images/blackHome.png")}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Home</Text>
         </Pressable>
@@ -56,7 +58,8 @@ export default function App() {
           color:darkMode ? colors.white : colors.black
           },
         headerLeft: () => <CustomBurgerButton/>,
-        title: ""
+        headerRight: () => <ImageSearchBar/>,
+        title: "",
         }} 
         drawerContent={props => drawerContent(props, darkMode)}>
         <Drawer.Screen name="Home" component={Home}/>
