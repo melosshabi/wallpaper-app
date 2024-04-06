@@ -1,6 +1,12 @@
 type ComponentProps = {
-    Home:undefined,
+    Home:{
+        photos:Array
+    } | undefined,
     WallpaperDetails:{
         wallpaperUrl:string
+    },
+    SearchResults:{
+        searchedPhotos:Array
     }
+    SignUp:undefined
 }

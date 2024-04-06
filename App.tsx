@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {NavigationContainer} from '@react-navigation/native'
-import { DrawerContentComponentProps, DrawerItem, createDrawerNavigator } from '@react-navigation/drawer'
-import { View, Pressable, useColorScheme, Text, StyleSheet, Image, Switch } from 'react-native'
+import { DrawerContentComponentProps, createDrawerNavigator } from '@react-navigation/drawer'
+import { View, Pressable, useColorScheme, Text, StyleSheet, Image } from 'react-native'
 // Components
 import Home from './screens/Home'
 import CustomBurgerButton from './components/CustomBurgerButton'
@@ -9,7 +9,8 @@ import WallpaperDetails from './screens/WallpaperDetails'
 import ImageSearchBar from './components/ImageSearchBar'
 // lib
 import colors from './lib/colors'
-import { SearchBar } from 'react-native-screens'
+import SignUp from './screens/SignUp'
+import { auth } from './lib/firebase-config'
 
 function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolean){
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState<boolean>(false)
@@ -25,15 +26,15 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Home</Text>
         </Pressable>
         
-        <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
+        {!auth.currentUser && <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
           <Image source={darkMode ? require('./images/whiteSignIn.png') : require('./images/blackSignIn.png')}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Sign In</Text>
-        </Pressable>
+        </Pressable>}
         
-        <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
+        {!auth.currentUser && <Pressable onPress={() => navigation.navigate('SignUp', undefined)} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
           <Image source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Sign Up</Text>
-        </Pressable>
+        </Pressable>}
       </View>
       <View style={styles.drawerFooter}>
           <Pressable onPress={() => navigation.navigate("Settings")} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
@@ -66,6 +67,7 @@ export default function App() {
         <Drawer.Screen name="WallpaperDetails" component={WallpaperDetails} options={{
           headerShown:false
         }}/>
+        <Drawer.Screen name="SignUp" component={SignUp}/>
       </Drawer.Navigator>
     </NavigationContainer>
   )

@@ -4,9 +4,12 @@ import colors from '../lib/colors'
 // @ts-ignore
 import {API_KEY} from "@env"
 import { useNavigation } from '@react-navigation/native'
+import { DrawerScreenProps } from '@react-navigation/drawer'
 
+type HomeProps = DrawerScreenProps<ComponentProps, 'Home'>
 const dvw = Dimensions.get('window').width
-export default function Home() {
+const dvh = Dimensions.get('window').height
+export default function Home({route}:HomeProps) {
 
   const [homePhotos, setHomePhotos] = useState<any[]>([])
   const darkMode = useColorScheme() === 'dark'
@@ -25,13 +28,17 @@ export default function Home() {
     }
     fetchPhotos()
   }, [])
+
+  useEffect(() => {
+    if(route.params) setHomePhotos([...route.params.photos])
+  }, [route.params])
   return (
     <SafeAreaView style={darkMode ? styles.darkHome : styles.lightHome}>
-        <FlatList data={homePhotos} numColumns={2}
+        <FlatList style={{minHeight:dvh}} data={homePhotos} numColumns={2}
           renderItem={({item}) => (
             // @ts-ignore
             <Pressable onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait})}>
-              <Image source={{uri:item.src.original }} style={styles.homePhotos}/>
+              <Image source={{uri:item.src.original}} style={styles.homePhotos}/>
             </Pressable>
           )}
           />

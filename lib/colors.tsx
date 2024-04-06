@@ -4,9 +4,9 @@ const colors ={
     // transparentBlack:'rgba(0, 0, 0, .8)',
     white:'#fbfbfb',
     transparentWhite:"rgba(255, 255, 255, .2)",
-    darkOrange:'#5d160d',
+    darkOrange:'#f5540a',
     brown:'#50473f',
-    orange:'#f02c2d',
+    orange:'#f98606',
     lightGray:'#aaa09f',
     gray:'#7f817d',
 }
