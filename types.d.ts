@@ -8,5 +8,8 @@ type ComponentProps = {
     SearchResults:{
         searchedPhotos:Array
     }
-    SignUp:undefined
+    SignUp:undefined,
+    SignIn:undefined,
+    Settings:undefined,
+    Profile:undefined
 }

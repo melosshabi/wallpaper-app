@@ -7,13 +7,23 @@ import Home from './screens/Home'
 import CustomBurgerButton from './components/CustomBurgerButton'
 import WallpaperDetails from './screens/WallpaperDetails'
 import ImageSearchBar from './components/ImageSearchBar'
+import SignUp from './screens/SignUp'
+import SignIn from './screens/SignIn'
 // lib
 import colors from './lib/colors'
-import SignUp from './screens/SignUp'
 import { auth } from './lib/firebase-config'
+import { signOut } from 'firebase/auth'
+import Settings from './screens/Settings'
+import Profile from './screens/Profile'
 
 function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolean){
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState<boolean>(false)
+  async function logOut(){
+    signOut(auth).then(() => {
+      navigation.navigate("Home", undefined)
+      // navigation.closeDrawer()
+    })
+  }
   return (
     <View style={[styles.customDrawer, darkMode ? styles.customDrawerDark : styles.customDrawerLight]}>
       <View style={styles.drawerHeader}>
@@ -26,7 +36,7 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Home</Text>
         </Pressable>
         
-        {!auth.currentUser && <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
+        {!auth.currentUser && <Pressable onPress={() => navigation.navigate("SignIn", undefined)} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
           <Image source={darkMode ? require('./images/whiteSignIn.png') : require('./images/blackSignIn.png')}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Sign In</Text>
         </Pressable>}
@@ -37,10 +47,23 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
         </Pressable>}
       </View>
       <View style={styles.drawerFooter}>
+        {auth.currentUser && 
+          <Pressable onPress={() => navigation.navigate("Profile", undefined)} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
+            <Image source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
+            <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>My Profile</Text>
+          </Pressable>}
+
           <Pressable onPress={() => navigation.navigate("Settings")} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
             <Image source={darkMode ? require('./images/whiteGear.png') : require('./images/blackGear.png')}/> 
             <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Settings</Text>
           </Pressable>
+
+          {auth.currentUser &&
+            <Pressable style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]} onPress={() => logOut()}>
+              <Image source={darkMode ? require('./images/whiteSignOut.png') : require('./images/blackSignOut.png')}/>
+              <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Sign Out</Text>
+            </Pressable>
+          }
       </View>
     </View>
   )
@@ -68,6 +91,9 @@ export default function App() {
           headerShown:false
         }}/>
         <Drawer.Screen name="SignUp" component={SignUp}/>
+        <Drawer.Screen name="SignIn" component={SignIn}/>
+        <Drawer.Screen name="Settings" component={Settings}/>
+        <Drawer.Screen name="Profile" component={Profile}/>
       </Drawer.Navigator>
     </NavigationContainer>
   )
@@ -75,8 +101,8 @@ export default function App() {
 const styles = StyleSheet.create({
   customDrawer:{
     flex:1,
-    justifyContent:'space-between',
     backgroundColor:colors.white,
+    justifyContent:'flex-start'
   },
   customDrawerLight:{
     backgroundColor:colors.white
@@ -107,7 +133,7 @@ const styles = StyleSheet.create({
     color:'white'
   },
   drawerBody:{
-    height:'50%',
+    // height:'50%',
   },
   drawerText:{
     color:'white',
@@ -137,6 +163,9 @@ const styles = StyleSheet.create({
     alignItems:'center'
   },
   drawerFooter:{
+    width:'100%',
+    position:'absolute',
+    bottom:0
   },
   themeIcon:{
     width:50,

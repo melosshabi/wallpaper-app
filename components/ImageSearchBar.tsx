@@ -31,6 +31,7 @@ export default function ImageSearchBar() {
       onSubmitEditing={() => handleSubmit(false)}
       value={searchQuery}
       onChangeText={setSearchQuery}
+      placeholderTextColor={darkMode ? colors.white : colors.black}
       />
       <Pressable onPress={() => handleSubmit(true)} style={({pressed}) => [styles.searchButton, pressed ? {backgroundColor:darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
         <Image style={styles.magnifyingGlass} source={darkMode ? require('../images/whiteMagnifyingGlass.png') : require('../images/blackMagnifyingGlass.png')}/>
@@ -51,10 +52,12 @@ const styles = StyleSheet.create({
         paddingBottom:0
     },
     darkInput:{
-        borderBottomColor:'white'
+        borderBottomColor:'white',
+        color:colors.white
     },
     lightInput:{
-        borderBottomColor:'black'
+        borderBottomColor:'black',
+        color:colors.black
     },
     magnifyingGlass:{
         width:25,

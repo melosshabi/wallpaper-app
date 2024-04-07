@@ -1,9 +1,9 @@
 import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View, useColorScheme } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '../lib/colors'
 import * as yup from 'yup'
 import {Formik} from 'formik'
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import {signInWithEmailAndPassword} from 'firebase/auth'
 import { auth } from '../lib/firebase-config'
 import { useNavigation } from '@react-navigation/native'
 
@@ -15,78 +15,52 @@ export default function SignUp() {
     
     const darkMode = useColorScheme() === 'dark'
 
-    const signUpSchema = yup.object().shape({
-        username:yup.string().min(4, "Username must be at least 4 characters long"),
+    const signInSchema = yup.object().shape({
         email:yup.string(),
         password:yup.string().min(6, "Password must be at least 6 characters long")
     })
     const [emailError, setEmailError] = useState<string>("")
     const [passwordError, setPasswordError] = useState<string>("")
-    const [signUpInProgress, setSignUpInProgress] = useState<boolean>(false)
-    async function signUp(username:string, email:string, password:string){
-        if(!username || !email || !password) return
+    const [signInOnProgress, setSignInOnProgress] = useState<boolean>(false)
+    async function signIn(email:string, password:string){
+        if(!email || !password) return
 
-        setSignUpInProgress(true)
-        let user = null
-        await createUserWithEmailAndPassword(auth, email, password)
-        .then(res => {
-          setSignUpInProgress(false)
-          user = res.user
+        setSignInOnProgress(true)
+        signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+            setSignInOnProgress(false)
+            //@ts-ignore
+            navigation.navigate('Home', undefined)
         })
         .catch(err => {
-            setSignUpInProgress(false)
+            setSignInOnProgress(false)
             switch(err.code){
-                case 'auth/email-already-in-use':
-                    setEmailError("Email is already in use")
-                break;
-                case 'auth/invalid-email':
-                    setEmailError("Email is invalid")
+                case 'auth/user-not-found':
+                    setEmailError("Account does not exist")
                     break;
-                case 'auth/weak-password':
-                    setPasswordError('Password must be at least 6 characters long')
+                case 'auth/wrong-password':
+                    setPasswordError("Wrong password")
                     break;
             }
         })
-        if(user !== null){
-            await updateProfile(user, {displayName:username})
-            .then(() => {
-              //@ts-ignore
-              navigation.navigate('Home', undefined)
-            })
-        }
-        
     }
   return (
-    <View style={[styles.signUpScreen]}>
-      <Image style={styles.image} source={require('../images/signUp.png')}/>
-      <View style={[styles.signUpForm, {backgroundColor:darkMode ? colors.black : colors.white}]}>
-        <Text style={[styles.headerText, {color:darkMode ? colors.white : colors.black}]}>Sign Up</Text>
+    <View style={[styles.signInScreen]}>
+      <Image style={styles.image} source={require('../images/signIn.jpg')}/>
+      <View style={[styles.signInForm, {backgroundColor:darkMode ? colors.black : colors.white}]}>
+        <Text style={[styles.headerText, {color:darkMode ? colors.white : colors.black}]}>Sign In</Text>
       <Formik
-        initialValues={{username:'', email: '', password:'' }}
-        validationSchema={signUpSchema}
-        onSubmit={values => signUp(values.username, values.email, values.password)}
+        initialValues={{email: '', password:''}}
+        validationSchema={signInSchema}
+        onSubmit={values => signIn(values.email, values.password)}
       >
      {({ handleChange, handleBlur, handleSubmit, errors, values }) => (
        <View>
-        {/* Username */}
-        <View style={styles.inputWrapper}>
-          <TextInput
-            onChangeText={handleChange('username')}
-            onBlur={handleBlur('username')}
-            value={values.username}
-            placeholder='Username'
-            style={[styles.inputs,{borderBottomColor: darkMode ? colors.white : colors.black}]}
-            autoCapitalize='none'
-            placeholderTextColor={darkMode ? 'white' : 'black'}
-        />
-        {errors.username && (<Text style={styles.error}>{errors.username}</Text>)}
-        </View>
 
          {/* Email */}
          <View style={styles.inputWrapper}>
           <TextInput
-            onChangeText={() => handleChange('email')}
-            onChange={() => setEmailError("")}
+            onChangeText={handleChange('email')}
             onBlur={handleBlur('email')}
             value={values.email}
             placeholder='Email'
@@ -115,7 +89,9 @@ export default function SignUp() {
           {passwordError && <Text style={styles.error}>{passwordError}</Text>}
          </View>
 
-         <Pressable onPress={() => handleSubmit()} style={({pressed}) => [styles.signUpButton, signUpInProgress && styles.disabledButton, pressed && {backgroundColor:colors.darkOrange}]} disabled={signUpInProgress}><Text style={styles.signUpButtonText}>{signUpInProgress ? 'Signing up' : 'Sign up'}</Text></Pressable>
+            <Pressable onPress={() => handleSubmit()} style={({pressed}) => [styles.signInButton, signInOnProgress && styles.disabledButton, pressed && {backgroundColor:colors.darkOrange}]} disabled={signInOnProgress}>
+                <Text style={styles.signInButtonText}>{signInOnProgress ? 'Signing in' : 'Sign in'}</Text>
+            </Pressable>
        </View>
      )}
    </Formik>
@@ -125,17 +101,18 @@ export default function SignUp() {
 }
 
 const styles = StyleSheet.create({
-    signUpScreen:{
+    signInScreen:{
         flex:1,
         justifyContent:'flex-end',
+        
     },
     image:{
         width:dvw,
         height:dvh,
         position:'absolute',
-
+        bottom:160
     },
-    signUpForm:{
+    signInForm:{
         height:dvh / 1.8,
         borderTopLeftRadius:50,
         borderTopRightRadius:50,
@@ -155,7 +132,7 @@ const styles = StyleSheet.create({
     error:{
         color:colors.orange
     },
-    signUpButton:{
+    signInButton:{
         width:dvw / 2.5,
         marginTop:20,
         marginLeft: dvw / 3.5,
@@ -166,7 +143,7 @@ const styles = StyleSheet.create({
     disabledButton:{
         opacity:.8
     },
-    signUpButtonText:{
+    signInButtonText:{
         textAlign:'center',
         fontSize:20,
         color:'white'
