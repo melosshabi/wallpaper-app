@@ -30,7 +30,7 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
         <Image source={require('./images/drawerBg.jpg')} style={styles.drawerBackground}/>
         <View style={styles.headerTextWrapper}><Text style={styles.headerText}>Mela Wallpapers</Text></View>
       </View>
-      <View style={styles.drawerBody}>
+      <View>
         <Pressable onPress={() => navigation.navigate("Home", undefined)}  style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
           <Image source={darkMode ? require("./images/whiteHome.png") : require("./images/blackHome.png")}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Home</Text>
@@ -42,14 +42,14 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
         </Pressable>}
         
         {!auth.currentUser && <Pressable onPress={() => navigation.navigate('SignUp', undefined)} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
-          <Image source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
+          <Image style={styles.userIcon} source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
           <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>Sign Up</Text>
         </Pressable>}
       </View>
       <View style={styles.drawerFooter}>
         {auth.currentUser && 
           <Pressable onPress={() => navigation.navigate("Profile", undefined)} style={({pressed}) => [styles.drawerButtons, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}]}>
-            <Image source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
+            <Image style={styles.userIcon} source={darkMode ? require('./images/whiteUser.png') : require('./images/blackUser.png')}/>
             <Text style={[styles.drawerText, darkMode ? styles.darkDrawerText : styles.lightDrawerText]}>My Profile</Text>
           </Pressable>}
 
@@ -131,10 +131,7 @@ const styles = StyleSheet.create({
     fontFamily:"Millenia",
     fontSize:30,
     color:'white'
-  },
-  drawerBody:{
-    // height:'50%',
-  },
+  }, 
   drawerText:{
     color:'white',
     fontSize:15,
@@ -170,5 +167,9 @@ const styles = StyleSheet.create({
   themeIcon:{
     width:50,
     height:50,
+  },
+  userIcon:{
+    width:25,
+    height:25
   }
 })

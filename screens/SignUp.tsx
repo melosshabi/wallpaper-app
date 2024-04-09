@@ -103,6 +103,7 @@ export default function SignUp() {
          <View style={[styles.inputWrapper]}>
            <TextInput
             onChangeText={handleChange('password')}
+            onChange={() => setPasswordError("")}
             onBlur={handleBlur('password')}
             value={values.password}
             placeholder='Password'

@@ -1,4 +1,4 @@
-import { StyleSheet, Image, FlatList, SafeAreaView, useColorScheme, Dimensions, Pressable } from 'react-native'
+import { StyleSheet, Image, FlatList, SafeAreaView, useColorScheme, Dimensions, Pressable, Text } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import colors from '../lib/colors'
 // @ts-ignore
@@ -37,7 +37,7 @@ export default function Home({route}:HomeProps) {
         <FlatList style={{minHeight:dvh}} data={homePhotos} numColumns={2}
           renderItem={({item}) => (
             // @ts-ignore
-            <Pressable onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait})}>
+            <Pressable style={styles.homePhotoWrapper} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait})}>
               <Image source={{uri:item.src.original}} style={styles.homePhotos}/>
             </Pressable>
           )}
@@ -53,11 +53,19 @@ const styles = StyleSheet.create({
   lightHome:{
     backgroundColor:colors.white
   },
-  homePhotos:{
+  homePhotoWrapper:{
     width:dvw / 2.2,
     height:280,
     marginLeft:10,
     marginVertical:10,
-    borderRadius:10
+    position:'relative',
+    alignItems:'flex-end',
+    justifyContent:'flex-end'
+  },
+  homePhotos:{
+    width:dvw / 2.2,
+    height:280,
+    borderRadius:10,
+    position:'absolute'
   }
 })

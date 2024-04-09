@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, useColorScheme, Image, Dimensions, Pressable, NativeModules, BackHandler, Animated, Easing } from 'react-native'
+import { StyleSheet, Text, View, useColorScheme, Image, Dimensions, Pressable, BackHandler, Animated, Easing } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { DrawerScreenProps } from '@react-navigation/drawer'
 import colors from '../lib/colors'
@@ -7,6 +7,9 @@ import RNFetchBlob from 'rn-fetch-blob'
 // @ts-ignore
 import ManageWallpaper, { TYPE } from 'react-native-manage-wallpaper';
 import Snackbar from 'react-native-snackbar'
+import { auth, db } from '../lib/firebase-config'
+import { addDoc, collection } from 'firebase/firestore'
+import SignUpPopUp from '../components/SignUpPopUp'
 
 type WallpaperDetailsProps = DrawerScreenProps<ComponentProps, 'WallpaperDetails'>
 
@@ -49,7 +52,6 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             setShowWallpaperTypes(false)
             scaleVal.resetAnimation()
         }
-        
     }
     function setWallpaper(wallpaperType: TYPE.HOME | TYPE.LOCK | TYPE.BOTH, uri:string){
         setShowWallpaperTypes(false)
@@ -71,6 +73,25 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
         navigation.goBack()
         return true
     })
+    const [showPopUp, setShowPopUp] = useState<boolean>(false)
+
+    async function addToFavorites(photoUrl:string){
+        if(auth.currentUser){
+            const favoritesCollection = collection(db, 'favoritePhotos')
+            await addDoc(favoritesCollection, {
+                userId:auth.currentUser.uid,
+                username:auth.currentUser.displayName,
+                photoUrl
+            }).then(() => {
+                Snackbar.show({
+                    text:'Wallpaper Saved',
+                    duration:Snackbar.LENGTH_LONG
+                })
+            })
+        }else{
+            setShowPopUp(true)
+        }
+    }
   return (
     <View style={styles.wallpaperWrapper}>
         <Pressable onPress={() => toggleWallpaperTypes('hide')} style={[styles.blackView, !showWallpaperTypes ? styles.invisibleElem : {}]}></Pressable>
@@ -100,10 +121,12 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             <Pressable onPress={() => toggleWallpaperTypes('show')} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
                 <Image style={styles.actionIcons} source={require('../images/photo.png')}/>
             </Pressable>
-            <Pressable style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+            <Pressable onPress={()=> addToFavorites(route.params.wallpaperUrl)} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
                 <Image style={styles.actionIcons} source={require('../images/emptyWhiteHeart.png')}/>
             </Pressable>
         </View>
+
+        <SignUpPopUp showPopUp={showPopUp} setShowPopUp={setShowPopUp}/>
     </View>
   )
 }

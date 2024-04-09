@@ -13,3 +13,10 @@ type ComponentProps = {
     Settings:undefined,
     Profile:undefined
 }
+type FavoriteWallpapers = {
+    userId:string,
+    photoUrl:string,
+    username:string,
+    // id refers to the document Id on the database
+    id:string
+}

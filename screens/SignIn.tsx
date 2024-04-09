@@ -61,6 +61,7 @@ export default function SignUp() {
          <View style={styles.inputWrapper}>
           <TextInput
             onChangeText={handleChange('email')}
+            onChange={() => setEmailError("")}
             onBlur={handleBlur('email')}
             value={values.email}
             placeholder='Email'
@@ -77,6 +78,7 @@ export default function SignUp() {
          <View style={[styles.inputWrapper]}>
            <TextInput
             onChangeText={handleChange('password')}
+            onChange={() => setPasswordError("")}
             onBlur={handleBlur('password')}
             value={values.password}
             placeholder='Password'
