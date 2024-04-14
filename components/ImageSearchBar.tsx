@@ -1,34 +1,16 @@
 import { Dimensions, StyleSheet, TextInput, View, useColorScheme, Image, Pressable, Keyboard } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import colors from '../lib/colors'
 import { useNavigation } from '@react-navigation/native'
-import {default as storage} from "@react-native-async-storage/async-storage"
 // @ts-ignore
 import {API_KEY} from "@env"
-import { darkModeOptions } from '../App'
 
 const dvw = Dimensions.get('window').width
 
 export default function ImageSearchBar() {
     const [searchQuery, setSearchQuery] = useState<string>("")
     const navigation = useNavigation()
-    const [darkMode, setDarkMode] = useState<boolean>(false)
-    const colorScheme = useColorScheme()
-    useEffect(() => {
-      async function checkDarkMode(){
-        if(!await storage.getItem("darkMode")){
-          await storage.setItem('darkMode', darkModeOptions.systemDefault)
-          setDarkMode(colorScheme === "dark")
-        }else if(await storage.getItem('darkMode') === darkModeOptions.disabled){
-          setDarkMode(false)
-        }else if(await storage.getItem('darkMode') === darkModeOptions.enabled){
-          setDarkMode(true)
-        }else{
-          setDarkMode(colorScheme === 'dark')
-        }
-      }
-      checkDarkMode()
-    }, [])
+    const darkMode = useColorScheme() === "dark"
 
     // clickedSearchButton refers to the magnifying glass
     async function handleSubmit(clickedSearchButton:boolean){

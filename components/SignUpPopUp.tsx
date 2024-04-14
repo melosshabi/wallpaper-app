@@ -1,29 +1,11 @@
-import { Animated, Dimensions, Easing, Image, Pressable, StyleSheet, Text, View, useColorScheme } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { Animated, Dimensions, Easing, Image, Pressable, StyleSheet, Text, useColorScheme } from 'react-native'
+import React, { useEffect, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import colors from '../lib/colors'
-import { darkModeOptions } from '../App'
-import {default as storage} from '@react-native-async-storage/async-storage'
 
 export default function SignUpPopUp({showPopUp, setShowPopUp}:{showPopUp:boolean, setShowPopUp:React.Dispatch<React.SetStateAction<boolean>>}) {
     const navigation = useNavigation()
-    const [darkMode, setDarkMode] = useState<boolean>(false)
-    const colorScheme = useColorScheme()
-    useEffect(() => {
-      async function checkDarkMode(){
-        if(!await storage.getItem("darkMode")){
-          await storage.setItem('darkMode', darkModeOptions.systemDefault)
-          setDarkMode(colorScheme === "dark")
-        }else if(await storage.getItem('darkMode') === darkModeOptions.disabled){
-          setDarkMode(false)
-        }else if(await storage.getItem('darkMode') === darkModeOptions.enabled){
-          setDarkMode(true)
-        }else{
-          setDarkMode(colorScheme === 'dark')
-        }
-      }
-      checkDarkMode()
-    }, [])
+    const darkMode = useColorScheme() === 'dark'
     
     const bottomVal = useRef(new Animated.Value(-dvh / 3)).current
     useEffect(() => {

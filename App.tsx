@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import {NavigationContainer} from '@react-navigation/native'
 import { DrawerContentComponentProps, createDrawerNavigator } from '@react-navigation/drawer'
 import { View, Pressable, useColorScheme, Text, StyleSheet, Image } from 'react-native'
-import {default as storage} from '@react-native-async-storage/async-storage'
 // Components
 import Home from './screens/Home'
 import CustomBurgerButton from './components/CustomBurgerButton'
@@ -77,24 +76,7 @@ export const darkModeOptions = {
 
 export default function App(){
   const Drawer = createDrawerNavigator<ComponentProps>()
-  const [darkMode, setDarkMode] = useState<boolean>(false)
-  const colorScheme = useColorScheme()
-
-  useEffect(() => {
-    async function checkDarkMode(){
-      if(!await storage.getItem("darkMode")){
-        await storage.setItem('darkMode', darkModeOptions.systemDefault)
-        setDarkMode(colorScheme === "dark")
-      }else if(await storage.getItem('darkMode') === darkModeOptions.disabled){
-        setDarkMode(false)
-      }else if(await storage.getItem('darkMode') === darkModeOptions.enabled){
-        setDarkMode(true)
-      }else{
-        setDarkMode(colorScheme === 'dark')
-      }
-    }
-    checkDarkMode()
-  }, [])
+  const darkMode = useColorScheme() === 'dark'
 
   return (
     <NavigationContainer>

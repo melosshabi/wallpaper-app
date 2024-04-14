@@ -4,15 +4,12 @@ import {auth, db} from '../lib/firebase-config'
 import colors from '../lib/colors'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useNavigation } from '@react-navigation/native'
-import { darkModeOptions } from '../App'
-import {default as storage} from "@react-native-async-storage/async-storage"
 
 export default function Profile() {
 
     const navigation = useNavigation()
     const [favoriteWallpapers, setFavoriteWallpapers] = useState<FavoriteWallpapers[]>([])
-    const [darkMode, setDarkMode] = useState<boolean>(false)
-    const colorScheme = useColorScheme()
+    const darkMode = useColorScheme() === 'dark'
     useEffect(() => {
         async function fetchFavorites(){
             let tempArr: FavoriteWallpapers[] = []
@@ -27,18 +24,6 @@ export default function Profile() {
             })
             setFavoriteWallpapers([...tempArr])
         }
-        // Decides whether to go with dark mode or not
-        async function setColorScheme(){
-            const darkModeSetting = await storage.getItem('darkMode')
-            if(darkModeSetting === darkModeOptions.disabled){
-                setDarkMode(false)
-            }else if(darkModeSetting === darkModeOptions.enabled){
-                setDarkMode(true)
-            }else{
-                setDarkMode(colorScheme === 'dark')
-            }
-        }
-        setColorScheme()
         fetchFavorites()
     }, [])
 

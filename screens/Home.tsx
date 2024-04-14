@@ -1,8 +1,6 @@
 import { StyleSheet, Image, FlatList, SafeAreaView, Dimensions, Pressable, useColorScheme } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import colors from '../lib/colors'
-import {default as storage} from '@react-native-async-storage/async-storage'
-import { darkModeOptions } from '../App'
 // @ts-ignore
 import {API_KEY} from "@env"
 import { useNavigation } from '@react-navigation/native'
@@ -14,8 +12,7 @@ const dvh = Dimensions.get('window').height
 
 export default function Home({route}:HomeProps) {
   const [homePhotos, setHomePhotos] = useState<any[]>([])
-  const [darkMode, setDarkMode] = useState<boolean>(false)
-  const colorScheme = useColorScheme()
+  const darkMode = useColorScheme() === 'dark'
   const navigation = useNavigation()
   const queries = ['coding', 'nature', 'beach', 'dark', 'gaming', 'underwater', 'digital', 'excercise', 'interior', 'tech', 'gym']
   const randomIndex = Math.floor(Math.random() * queries.length)
@@ -29,19 +26,7 @@ export default function Home({route}:HomeProps) {
       const data = await res.json()
       setHomePhotos(() => [...data.photos])
     }
-    // Decides whether to go with dark mode or not
-    async function setColorScheme(){
-      const darkModeSetting = await storage.getItem('darkMode')
-      if(darkModeSetting === darkModeOptions.disabled){
-        setDarkMode(false)
-      }else if(darkModeSetting === darkModeOptions.enabled){
-        setDarkMode(true)
-      }else{
-        setDarkMode(colorScheme === 'dark')
-      }
-    }
     fetchPhotos()
-    setColorScheme()
   }, [])
 
   useEffect(() => {

@@ -1,50 +1,33 @@
-import { Dimensions, Image, Pressable, StyleSheet, Switch, Text, View, useColorScheme } from 'react-native'
+import { Dimensions, Image, Pressable, StyleSheet, Text, View, useColorScheme, Appearance } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import colors from '../lib/colors'
 import { darkModeOptions } from '../App'
-import {default as storage} from "@react-native-async-storage/async-storage"
 import { Dropdown } from 'react-native-element-dropdown';
-import RNREstart from 'react-native-restart'
-import { useNavigation } from '@react-navigation/native'
 
 const dvh = Dimensions.get('window').height
 const dvw = Dimensions.get('window').width
 
 export default function Settings(){
 
-    const [darkMode, setDarkMode] = useState<boolean>(false)
+    const darkMode = useColorScheme() === 'dark'
     // The current dark mode preference thats saved locally
-    const [darkModeSetting, setDarkModeSetting] = useState<string>("")
-    const colorScheme = useColorScheme()
     const dropDownData = [
         { label:"System Default", value:darkModeOptions.systemDefault},
         { label:"Dark", value:darkModeOptions.enabled  },
         { label:"Light", value:darkModeOptions.disabled }
     ]
 
-     // Decides whether to go with dark mode or not
-    async function setColorScheme(){
-        const darkModeSetting = await storage.getItem('darkMode')
-        if(darkModeSetting) setDarkModeSetting(darkModeSetting)
-        if(darkModeSetting === darkModeOptions.disabled){
-            setDarkMode(false)
-        }else if(darkModeSetting === darkModeOptions.enabled){
-            setDarkMode(true)
-        }else if(darkModeSetting === darkModeOptions.systemDefault){
-            setDarkMode(colorScheme === 'dark')
-        }
-    }
-
-    useEffect(() => {
-        setColorScheme()
-    }, [darkModeSetting])
-    const navigation = useNavigation()
     async function handleThemeChange(newDarkModeSetting: string){
-        await storage.setItem('darkMode', newDarkModeSetting)
-        const darkModeSetting = await storage.getItem('darkMode')
-        setDarkModeSetting(darkModeSetting as string)
-        // RNREstart.restart()
-        // navigation.reset()
+        switch(newDarkModeSetting){
+            case darkModeOptions.enabled:
+                Appearance.setColorScheme('dark')
+                break
+            case darkModeOptions.disabled:
+                Appearance.setColorScheme('light')
+                break
+            case darkModeOptions.systemDefault:
+                Appearance.setColorScheme(null)
+        }
     }
   return (
     <View style={[styles.settingsPage, darkMode ? styles.darkSettingsPage : styles.lightSettingsPage]}>
@@ -57,11 +40,11 @@ export default function Settings(){
                 labelField="label"
                 valueField="value"
                 placeholder=
-                {darkModeSetting === darkModeOptions.systemDefault ? "System Default"
-                : darkModeSetting === darkModeOptions.enabled ? "Dark" : "Light"
+                {darkMode === null ? "System Default"
+                : darkMode === true ? "Dark" : "Light"
                 }
-                placeholderStyle={darkMode ? {color:colors.black} : {color:colors.black}}
-                value={darkModeSetting}
+                placeholderStyle={darkMode ? {color:colors.white} : {color:colors.black}}
+                // value={darkMode ? "Dark" : !darkMode ? "Light" : "System Default"}
                 style={[styles.dropDown]}
                 // itemContainerStyle={darkMode ? {backgroundColor:colors.black} : {backgroundColor:colors.white}}
                 itemTextStyle={[darkMode ? {color:colors.white} : {color:colors.black}]}
