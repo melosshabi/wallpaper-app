@@ -4,12 +4,15 @@ import {auth, db} from '../lib/firebase-config'
 import colors from '../lib/colors'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useNavigation } from '@react-navigation/native'
+import { darkModeOptions } from '../App'
+import {default as storage} from "@react-native-async-storage/async-storage"
 
 export default function Profile() {
 
     const navigation = useNavigation()
-    const darkMode = useColorScheme() === 'dark'
     const [favoriteWallpapers, setFavoriteWallpapers] = useState<FavoriteWallpapers[]>([])
+    const [darkMode, setDarkMode] = useState<boolean>(false)
+    const colorScheme = useColorScheme()
     useEffect(() => {
         async function fetchFavorites(){
             let tempArr: FavoriteWallpapers[] = []
@@ -24,6 +27,18 @@ export default function Profile() {
             })
             setFavoriteWallpapers([...tempArr])
         }
+        // Decides whether to go with dark mode or not
+        async function setColorScheme(){
+            const darkModeSetting = await storage.getItem('darkMode')
+            if(darkModeSetting === darkModeOptions.disabled){
+                setDarkMode(false)
+            }else if(darkModeSetting === darkModeOptions.enabled){
+                setDarkMode(true)
+            }else{
+                setDarkMode(colorScheme === 'dark')
+            }
+        }
+        setColorScheme()
         fetchFavorites()
     }, [])
 
@@ -49,7 +64,7 @@ export default function Profile() {
                 <FlatList data={favoriteWallpapers} numColumns={2} 
                     renderItem={({item}) => (
                          // @ts-ignore
-                        <Pressable style={styles.photosWrappers} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.photoUrl})}>
+                        <Pressable style={styles.photosWrappers} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.photoUrl, navigatedFromProfile:true})}>
                             <Image source={{uri:item.photoUrl}} style={styles.Photos}/>
                         </Pressable>
                     )}

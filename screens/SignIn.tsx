@@ -1,11 +1,13 @@
 import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View, useColorScheme } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import colors from '../lib/colors'
 import * as yup from 'yup'
 import {Formik} from 'formik'
 import {signInWithEmailAndPassword} from 'firebase/auth'
 import { auth } from '../lib/firebase-config'
 import { useNavigation } from '@react-navigation/native'
+import { darkModeOptions } from '../App'
+import {default as storage} from '@react-native-async-storage/async-storage'
 
 const dvw = Dimensions.get("window").width
 const dvh = Dimensions.get('window').height
@@ -13,7 +15,23 @@ export default function SignUp() {
 
     const navigation = useNavigation()
     
-    const darkMode = useColorScheme() === 'dark'
+    const [darkMode, setDarkMode] = useState<boolean>(false)
+    const colorScheme = useColorScheme()
+
+    useEffect(() => {
+        // Decides whether to go with dark mode or not
+        async function setColorScheme(){
+            const darkModeSetting = await storage.getItem('darkMode')
+            if(darkModeSetting === darkModeOptions.disabled){
+                setDarkMode(false)
+            }else if(darkModeSetting === darkModeOptions.enabled){
+                setDarkMode(true)
+            }else{
+                setDarkMode(colorScheme === 'dark')
+            }
+        }
+        setColorScheme()
+    }, [])
 
     const signInSchema = yup.object().shape({
         email:yup.string(),

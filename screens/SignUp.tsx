@@ -6,14 +6,30 @@ import {Formik} from 'formik'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth } from '../lib/firebase-config'
 import { useNavigation } from '@react-navigation/native'
+import { darkModeOptions } from '../App'
+import {default as storage} from '@react-native-async-storage/async-storage'
 
 const dvw = Dimensions.get("window").width
 const dvh = Dimensions.get('window').height
 export default function SignUp() {
 
     const navigation = useNavigation()
-    
-    const darkMode = useColorScheme() === 'dark'
+    const [darkMode, setDarkMode] = useState<boolean>(false)
+    const colorScheme = useColorScheme()
+    useEffect(() => {
+      // Decides whether to go with dark mode or not
+      async function setColorScheme(){
+          const darkModeSetting = await storage.getItem('darkMode')
+          if(darkModeSetting === darkModeOptions.disabled){
+              setDarkMode(false)
+          }else if(darkModeSetting === darkModeOptions.enabled){
+              setDarkMode(true)
+          }else{
+              setDarkMode(colorScheme === 'dark')
+          }
+      }
+      setColorScheme()
+  }, [])
 
     const signUpSchema = yup.object().shape({
         username:yup.string().min(4, "Username must be at least 4 characters long"),

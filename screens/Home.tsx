@@ -1,6 +1,8 @@
-import { StyleSheet, Image, FlatList, SafeAreaView, useColorScheme, Dimensions, Pressable, Text } from 'react-native'
+import { StyleSheet, Image, FlatList, SafeAreaView, Dimensions, Pressable, useColorScheme } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import colors from '../lib/colors'
+import {default as storage} from '@react-native-async-storage/async-storage'
+import { darkModeOptions } from '../App'
 // @ts-ignore
 import {API_KEY} from "@env"
 import { useNavigation } from '@react-navigation/native'
@@ -9,10 +11,11 @@ import { DrawerScreenProps } from '@react-navigation/drawer'
 type HomeProps = DrawerScreenProps<ComponentProps, 'Home'>
 const dvw = Dimensions.get('window').width
 const dvh = Dimensions.get('window').height
-export default function Home({route}:HomeProps) {
 
+export default function Home({route}:HomeProps) {
   const [homePhotos, setHomePhotos] = useState<any[]>([])
-  const darkMode = useColorScheme() === 'dark'
+  const [darkMode, setDarkMode] = useState<boolean>(false)
+  const colorScheme = useColorScheme()
   const navigation = useNavigation()
   const queries = ['coding', 'nature', 'beach', 'dark', 'gaming', 'underwater', 'digital', 'excercise', 'interior', 'tech', 'gym']
   const randomIndex = Math.floor(Math.random() * queries.length)
@@ -26,7 +29,19 @@ export default function Home({route}:HomeProps) {
       const data = await res.json()
       setHomePhotos(() => [...data.photos])
     }
+    // Decides whether to go with dark mode or not
+    async function setColorScheme(){
+      const darkModeSetting = await storage.getItem('darkMode')
+      if(darkModeSetting === darkModeOptions.disabled){
+        setDarkMode(false)
+      }else if(darkModeSetting === darkModeOptions.enabled){
+        setDarkMode(true)
+      }else{
+        setDarkMode(colorScheme === 'dark')
+      }
+    }
     fetchPhotos()
+    setColorScheme()
   }, [])
 
   useEffect(() => {
@@ -37,7 +52,7 @@ export default function Home({route}:HomeProps) {
         <FlatList style={{minHeight:dvh}} data={homePhotos} numColumns={2}
           renderItem={({item}) => (
             // @ts-ignore
-            <Pressable style={styles.homePhotoWrapper} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait})}>
+            <Pressable style={styles.homePhotoWrapper} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait, navigatedFromProfile:false})}>
               <Image source={{uri:item.src.original}} style={styles.homePhotos}/>
             </Pressable>
           )}

@@ -70,6 +70,11 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             setShowWallpaperTypes(false)
             return true
         }
+        if(route.params.navigatedFromProfile){
+            // @ts-ignore
+            navigation.navigate('Profile', undefined)
+            return true
+        }
         navigation.goBack()
         return true
     })
@@ -98,7 +103,11 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
         <Image style={styles.wallpaper} source={{uri:route.params.wallpaperUrl}}/>
 
         <View style={styles.wallpaperHeader}>
-            <Pressable onPress={() => navigation.goBack()} style={({pressed}) => [styles.backBtn, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}] } >
+            <Pressable onPress={() => {
+                // @ts-ignore
+                if(route.params.navigatedFromProfile) navigation.navigate('Profile', undefined)
+                else navigation.goBack()
+            }} style={({pressed}) => [styles.backBtn, pressed ? {backgroundColor: darkMode ? colors.transparentWhite : colors.lightGray} : {}] } >
                 <Image style={styles.backArrow} source={require('../images/whiteArrow.png')} />
             </Pressable>
         </View>

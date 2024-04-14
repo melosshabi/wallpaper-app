@@ -1,16 +1,17 @@
 type ComponentProps = {
     Home:{
         photos:Array
-    } | undefined,
+    } | undefined
     WallpaperDetails:{
-        wallpaperUrl:string
+        wallpaperUrl:string,
+        navigatedFromProfile:boolean,
     },
     SearchResults:{
-        searchedPhotos:Array
+        searchedPhotos:Array,
     }
-    SignUp:undefined,
-    SignIn:undefined,
-    Settings:undefined,
+    SignUp:undefined
+    SignIn:undefined
+    Settings:undefined
     Profile:undefined
 }
 type FavoriteWallpapers = {

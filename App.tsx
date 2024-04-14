@@ -1,7 +1,8 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {NavigationContainer} from '@react-navigation/native'
 import { DrawerContentComponentProps, createDrawerNavigator } from '@react-navigation/drawer'
 import { View, Pressable, useColorScheme, Text, StyleSheet, Image } from 'react-native'
+import {default as storage} from '@react-native-async-storage/async-storage'
 // Components
 import Home from './screens/Home'
 import CustomBurgerButton from './components/CustomBurgerButton'
@@ -17,7 +18,7 @@ import Settings from './screens/Settings'
 import Profile from './screens/Profile'
 
 function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolean){
-  const [isDarkModeEnabled, setIsDarkModeEnabled] = useState<boolean>(false)
+  
   async function logOut(){
     signOut(auth).then(() => {
       navigation.navigate("Home", undefined)
@@ -68,19 +69,40 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
     </View>
   )
 }
-export default function App() {
+export const darkModeOptions = {
+  enabled:'true',
+  disabled:'false',
+  systemDefault:'systemDefault'
+}
+
+export default function App(){
   const Drawer = createDrawerNavigator<ComponentProps>()
-  const darkMode = useColorScheme() === "dark"
+  const [darkMode, setDarkMode] = useState<boolean>(false)
+  const colorScheme = useColorScheme()
+
+  useEffect(() => {
+    async function checkDarkMode(){
+      if(!await storage.getItem("darkMode")){
+        await storage.setItem('darkMode', darkModeOptions.systemDefault)
+        setDarkMode(colorScheme === "dark")
+      }else if(await storage.getItem('darkMode') === darkModeOptions.disabled){
+        setDarkMode(false)
+      }else if(await storage.getItem('darkMode') === darkModeOptions.enabled){
+        setDarkMode(true)
+      }else{
+        setDarkMode(colorScheme === 'dark')
+      }
+    }
+    checkDarkMode()
+  }, [])
 
   return (
     <NavigationContainer>
       <Drawer.Navigator screenOptions={{
         headerStyle:{
           backgroundColor:darkMode ? colors.black : colors.white
-          }, 
-        headerTitleStyle:{
-          color:darkMode ? colors.white : colors.black
-          },
+        },
+        unmountOnBlur:true,
         headerLeft: () => <CustomBurgerButton/>,
         headerRight: () => <ImageSearchBar/>,
         title: "",
@@ -88,7 +110,7 @@ export default function App() {
         drawerContent={props => drawerContent(props, darkMode)}>
         <Drawer.Screen name="Home" component={Home}/>
         <Drawer.Screen name="WallpaperDetails" component={WallpaperDetails} options={{
-          headerShown:false
+          headerShown:false,
         }}/>
         <Drawer.Screen name="SignUp" component={SignUp}/>
         <Drawer.Screen name="SignIn" component={SignIn}/>
