@@ -1,8 +1,8 @@
-import { Dimensions, Image, Pressable, StyleSheet, Text, View, useColorScheme, Appearance } from 'react-native'
+import { Dimensions, Image, Pressable, StyleSheet, Text, View, useColorScheme, Appearance, Linking } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import colors from '../lib/colors'
-import { darkModeOptions } from '../App'
 import { Dropdown } from 'react-native-element-dropdown';
+import { useNavigation } from '@react-navigation/native';
 
 const dvh = Dimensions.get('window').height
 const dvw = Dimensions.get('window').width
@@ -10,9 +10,12 @@ const dvw = Dimensions.get('window').width
 export default function Settings(){
 
     const darkMode = useColorScheme() === 'dark'
-    // The current dark mode preference thats saved locally
+    const darkModeOptions = {
+        enabled:'true',
+        disabled:'false',
+        systemDefault:'systemDefault'
+    }
     const dropDownData = [
-        { label:"System Default", value:darkModeOptions.systemDefault},
         { label:"Dark", value:darkModeOptions.enabled  },
         { label:"Light", value:darkModeOptions.disabled }
     ]
@@ -28,6 +31,10 @@ export default function Settings(){
             case darkModeOptions.systemDefault:
                 Appearance.setColorScheme(null)
         }
+    }
+
+    async function openUrl(url:string){
+        await Linking.openURL(url)
     }
   return (
     <View style={[styles.settingsPage, darkMode ? styles.darkSettingsPage : styles.lightSettingsPage]}>
@@ -53,13 +60,27 @@ export default function Settings(){
                 selectedTextStyle={darkMode ? {color:colors.white} : {color:colors.black}}
             />
         </Pressable>
+
+        <View style={styles.socialsWrapper}>
+            <Pressable onPress={() => openUrl('https://www.linkedin.com/in/melosshabi/')}>
+                <Image style={styles.socialsIcons} source={darkMode ? require('../images/whiteLinkedin.png') : require("../images/blackLinkedin.png")}/>
+            </Pressable>
+            <Pressable onPress={() => openUrl("https://www.github.com/melosshabi")}>
+                <Image style={styles.socialsIcons} source={darkMode ? require('../images/whiteGithub.png') : require('../images/blackGithub.png')}/>  
+            </Pressable>
+            <Pressable onPress={() => openUrl("https://www.melosshabi.com")}>
+                <Image style={styles.socialsIcons} source={darkMode ? require('../images/whiteGlobe.png') : require('../images/blackGlobe.png')}/>
+            </Pressable>
+        </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
     settingsPage:{
-        height:dvh,
+        height:dvh - 56,
+        justifyContent:'space-between',
+        alignItems:'center'
     },
     darkSettingsPage:{
         backgroundColor:colors.black
@@ -88,5 +109,15 @@ const styles = StyleSheet.create({
     dropDown:{
         width: dvw / 2.5,
         marginLeft:100,
+    },
+    socialsWrapper:{
+        width:dvw / 2,
+        flexDirection:'row',
+        justifyContent:'space-between',
+        marginBottom:20
+    },
+    socialsIcons:{
+        width:30,
+        height:30
     }
 })

@@ -1,6 +1,7 @@
 import { StyleSheet, Image, FlatList, SafeAreaView, Dimensions, Pressable, useColorScheme } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import colors from '../lib/colors'
+import ImageSearchBar from '../components/ImageSearchBar'
 // @ts-ignore
 import {API_KEY} from "@env"
 import { useNavigation } from '@react-navigation/native'
@@ -17,6 +18,9 @@ export default function Home({route}:HomeProps) {
   const queries = ['coding', 'nature', 'beach', 'dark', 'gaming', 'underwater', 'digital', 'excercise', 'interior', 'tech', 'gym']
   const randomIndex = Math.floor(Math.random() * queries.length)
   useEffect(() => {
+    navigation.setOptions({
+      headerRight:() => <ImageSearchBar/>
+    })
     async function fetchPhotos() {
       const res = await fetch(`https://api.pexels.com/v1/search?query=${queries[randomIndex]}&per_page=50`, {
         headers:{

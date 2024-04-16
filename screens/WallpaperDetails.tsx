@@ -60,7 +60,7 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
         },
         () => Snackbar.show({
             text:"Wallpaper changed",
-            duration:Snackbar.LENGTH_LONG
+            duration:Snackbar.LENGTH_SHORT
         }),
         wallpaperType
         )

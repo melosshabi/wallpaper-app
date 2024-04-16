@@ -68,11 +68,6 @@ function drawerContent({navigation}:DrawerContentComponentProps, darkMode:boolea
     </View>
   )
 }
-export const darkModeOptions = {
-  enabled:'true',
-  disabled:'false',
-  systemDefault:'systemDefault'
-}
 
 export default function App(){
   const Drawer = createDrawerNavigator<ComponentProps>()
@@ -84,9 +79,7 @@ export default function App(){
         headerStyle:{
           backgroundColor:darkMode ? colors.black : colors.white
         },
-        unmountOnBlur:true,
         headerLeft: () => <CustomBurgerButton/>,
-        headerRight: () => <ImageSearchBar/>,
         title: "",
         }} 
         drawerContent={props => drawerContent(props, darkMode)}>
