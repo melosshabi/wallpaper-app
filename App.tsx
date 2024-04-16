@@ -90,7 +90,7 @@ export default function App(){
         <Drawer.Screen name="SignUp" component={SignUp}/>
         <Drawer.Screen name="SignIn" component={SignIn}/>
         <Drawer.Screen name="Settings" component={Settings}/>
-        <Drawer.Screen name="Profile" component={Profile}/>
+        <Drawer.Screen name="Profile" component={Profile} options={{unmountOnBlur:true}}/>
       </Drawer.Navigator>
     </NavigationContainer>
   )
