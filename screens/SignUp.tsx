@@ -57,7 +57,7 @@ export default function SignUp() {
     }
   return (
     <View style={[styles.signUpScreen]}>
-      <Image style={styles.image} source={require('../images/signUp.png')}/>
+      <Image style={styles.image} source={require('../images/signUp.jpg')}/>
       <View style={[styles.signUpForm, {backgroundColor:darkMode ? colors.black : colors.white}]}>
         <Text style={[styles.headerText, {color:darkMode ? colors.white : colors.black}]}>Sign Up</Text>
       <Formik
