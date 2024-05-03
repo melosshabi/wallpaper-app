@@ -15,30 +15,57 @@ export default function Home({route}:HomeProps) {
   const [homePhotos, setHomePhotos] = useState<any[]>([])
   const darkMode = useColorScheme() === 'dark'
   const navigation = useNavigation()
-  const queries = ['coding', 'nature', 'beach', 'dark', 'gaming', 'underwater', 'digital', 'excercise', 'interior', 'tech', 'gym']
-  const randomIndex = Math.floor(Math.random() * queries.length)
+  const queries = ['coding', 'nature', 'beach', 'dark', 'gaming', 'underwater', 'digital', 'interior', 'gym']
+
+  // This function generates an index based on the length of the "queries" array
+  function generateQueryIndex(){
+    return Math.floor(Math.random() * queries.length)
+  }
+  const randomIndex = generateQueryIndex()
+  const [pageNumber, setPageNumber] = useState(1)
+
+  async function fetchPhotos(page:number, queryIndex:number) {
+    const res = await fetch(`https://api.pexels.com/v1/search?query=${queries[queryIndex]}&page=${page}}&per_page=50`, {
+      headers:{
+        Authorization:API_KEY
+      }
+    })
+    const data = await res.json()
+    setHomePhotos(prev => [...prev,...data.photos])
+  }
+
   useEffect(() => {
     navigation.setOptions({
       headerRight:() => <ImageSearchBar/>
     })
-    async function fetchPhotos() {
-      const res = await fetch(`https://api.pexels.com/v1/search?query=${queries[randomIndex]}&per_page=50`, {
-        headers:{
-          Authorization:API_KEY
-        }
-      })
-      const data = await res.json()
-      setHomePhotos(() => [...data.photos])
-    }
-    fetchPhotos()
+    fetchPhotos(pageNumber, randomIndex)
   }, [])
 
   useEffect(() => {
     if(route.params) setHomePhotos([...route.params.photos])
   }, [route.params])
+
+  const [imageListRefreshing, setImageListRefreshing] = useState(false)
+  // This function fetches new images when the user refreshes the homescreen
+  async function fetchNewImages(){
+    const randomIndex = generateQueryIndex()
+    fetchPhotos(pageNumber, randomIndex)
+  }
   return (
     <SafeAreaView style={darkMode ? styles.darkHome : styles.lightHome}>
-        <FlatList style={{minHeight:dvh}} data={homePhotos} numColumns={2}
+        <FlatList 
+        refreshing={imageListRefreshing}
+        onRefresh={() => {
+          setImageListRefreshing(true)
+          fetchNewImages().then(() => setImageListRefreshing(false))
+        }} 
+        style={{minHeight:dvh}} data={homePhotos} numColumns={2}
+        onScroll={(e): void => {
+          if(e.nativeEvent.contentOffset.y + e.nativeEvent.layoutMeasurement.height === e.nativeEvent.contentSize.height){
+            setPageNumber(prev => ++prev)
+            fetchPhotos(pageNumber, randomIndex)
+          }
+        }}
           renderItem={({item}) => (
             // @ts-ignore
             <Pressable style={styles.homePhotoWrapper} onPress={() => navigation.navigate('WallpaperDetails', {wallpaperUrl:item.src.portrait, navigatedFromProfile:false})}>

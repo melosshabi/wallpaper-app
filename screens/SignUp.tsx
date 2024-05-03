@@ -1,4 +1,4 @@
-import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View, useColorScheme } from 'react-native'
+import { Dimensions, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
 import colors from '../lib/colors'
 import * as yup from 'yup'
@@ -55,10 +55,13 @@ export default function SignUp() {
         }
         
     }
+    const [keyboardVisible, setKeyboardVisible] = useState(false)
+    Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
+    Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
   return (
     <View style={[styles.signUpScreen]}>
       <Image style={styles.image} source={require('../images/signUp.jpg')}/>
-      <View style={[styles.signUpForm, {backgroundColor:darkMode ? colors.black : colors.white}]}>
+      <View style={[styles.signUpForm, {backgroundColor:darkMode ? colors.black : colors.white}, keyboardVisible && {marginBottom:-60}]}>
         <Text style={[styles.headerText, {color:darkMode ? colors.white : colors.black}]}>Sign Up</Text>
       <Formik
         initialValues={{username:'', email: '', password:'' }}
