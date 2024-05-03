@@ -8,6 +8,7 @@ import {API_KEY} from "@env"
 const dvw = Dimensions.get('window').width
 
 export default function ImageSearchBar() {
+
     const [searchQuery, setSearchQuery] = useState<string>("")
     const navigation = useNavigation()
     const darkMode = useColorScheme() === "dark"
