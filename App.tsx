@@ -86,6 +86,7 @@ export default function App(){
         <Drawer.Screen name="Home" component={Home}/>
         <Drawer.Screen name="WallpaperDetails" component={WallpaperDetails} options={{
           headerShown:false,
+          unmountOnBlur:true
         }}/>
         <Drawer.Screen name="SignUp" component={SignUp} options={{unmountOnBlur:true}}/>
         <Drawer.Screen name="SignIn" component={SignIn} options={{unmountOnBlur:true}}/>

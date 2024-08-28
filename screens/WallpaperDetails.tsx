@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, useColorScheme, Image, Dimensions, Pressable, BackHandler } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DrawerScreenProps } from '@react-navigation/drawer'
 import colors from '../lib/colors'
 import { useNavigation } from '@react-navigation/native'
@@ -8,7 +8,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import ManageWallpaper, { TYPE } from 'react-native-manage-wallpaper';
 import Snackbar from 'react-native-snackbar'
 import { auth, db } from '../lib/firebase-config'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore'
 import SignUpPopUp from '../components/SignUpPopUp'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
@@ -22,6 +22,24 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
     const darkMode = useColorScheme() === 'dark'
     const navigation = useNavigation()
 
+    const [isWallpaperInFavorites, setIsWallpaperInFavorites] = useState(false)
+    useEffect(() => {
+        auth.onAuthStateChanged(async () => {
+            if(auth.currentUser){
+                const favoritesCollection = collection(db, 'favoritePhotos')
+                const wallpaperQuery = query(favoritesCollection, where("userId", "==", auth.currentUser.uid), where("photoUrl", "==", route.params.wallpaperUrl))
+                const wallpaperDocs = await getDocs(wallpaperQuery)
+                if(!wallpaperDocs.empty){
+                    wallpaperDocs.forEach(doc => {
+                        if(doc.data().photoUrl === route.params.wallpaperUrl){
+                            setIsWallpaperInFavorites(true)
+                        }
+                    })
+                }
+            }
+        })
+    }, [])
+    
     async function downloadImage(url:string){
         const date = new Date()
         const pictureDir = RNFetchBlob.fs.dirs.PictureDir
@@ -93,18 +111,47 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
     async function addToFavorites(photoUrl:string){
         if(auth.currentUser){
             const favoritesCollection = collection(db, 'favoritePhotos')
+            const wallpaperQuery = query(favoritesCollection, where("userId", "==", auth.currentUser.uid), where("photoUrl", "==", photoUrl))
+            const wallpaperDocs = await getDocs(wallpaperQuery)
+            if(!wallpaperDocs.empty){
+                if(wallpaperDocs.docs[0].data().photoUrl === photoUrl){
+                    Snackbar.show({
+                        text:'Wallpaper is already on your favorites',
+                        duration:Snackbar.LENGTH_LONG
+                    })
+                    return
+                }
+            }
             await addDoc(favoritesCollection, {
                 userId:auth.currentUser.uid,
                 username:auth.currentUser.displayName,
                 photoUrl
-            }).then(() => {
+            })
                 Snackbar.show({
                     text:'Wallpaper Saved',
                     duration:Snackbar.LENGTH_LONG
                 })
-            })
+                setIsWallpaperInFavorites(true)
         }else{
             setShowPopUp(true)
+        }
+    }
+    async function removeFromFavorites(photoUrl:string){
+        if(auth.currentUser){
+            const favoritesCollection = collection(db, 'favoritePhotos')
+            const wallpaperQuery = query(favoritesCollection, where("userId", "==", auth.currentUser.uid), where("photoUrl", "==", photoUrl))
+            const wallpaperDocs = await getDocs(wallpaperQuery)
+            wallpaperDocs.docs.forEach(async document => {
+                if(document.data().photoUrl === route.params.wallpaperUrl){
+                    const wallpaperDoc = doc(db, 'favoritePhotos', document.id)
+                    await deleteDoc(wallpaperDoc)
+                    Snackbar.show({
+                        text:"Wallpaper removed from favorites",
+                        duration:Snackbar.LENGTH_LONG,
+                    })
+                    setIsWallpaperInFavorites(false)
+                }
+            })
         }
     }
   return (
@@ -140,8 +187,11 @@ export default function WallpaperDetails({route}: WallpaperDetailsProps) {
             <Pressable onPress={() => toggleWallpaperTypes(WallpaperTypesActions.show)} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
                 <Image style={styles.actionIcons} source={require('../images/photo.png')}/>
             </Pressable>
-            <Pressable onPress={()=> addToFavorites(route.params.wallpaperUrl)} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
-                <Image style={styles.actionIcons} source={require('../images/emptyWhiteHeart.png')}/>
+            <Pressable onPress={()=> {
+                if(!isWallpaperInFavorites) addToFavorites(route.params.wallpaperUrl)
+                else removeFromFavorites(route.params.wallpaperUrl)
+                }} style={({pressed}) => [styles.actionButtons, pressed ? {backgroundColor:colors.transparentWhite} : {}]}>
+                <Image style={styles.actionIcons} source={isWallpaperInFavorites ? require('../images/filledWhiteHeart.png') : require('../images/emptyWhiteHeart.png')}/>
             </Pressable>
         </View>
 
